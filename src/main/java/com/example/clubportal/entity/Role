@@ -1,0 +1,7 @@
+package com.example.clubportal.entity;
+
+public enum Role {
+    MEMBER,         // Regular member
+    COORDINATOR,    // Club coordinator
+    ADMIN           // Admin role, if applicable
+}
