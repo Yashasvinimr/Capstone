@@ -10,6 +10,7 @@ import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -26,7 +27,6 @@ public class Club {
 
     @Column(nullable = false, unique = true)
     private String name;
-
     private String description;
 
     @Column(nullable = false, updatable = false)
@@ -34,9 +34,24 @@ public class Club {
 
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
+    private Set<ClubMember> members = new HashSet<>();
+
+    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private Set<ClubMember> coordinators;
 
-    @ManyToMany
-    @JoinTable(name = "club_members", joinColumns = @JoinColumn(name = "club_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    private Set<User> members;
+
+    // New Method to Fetch Coordinators
+    public Set<User> getCoordinators() {
+        if (members == null) return new HashSet<>(); // Ensure it's not null
+        Set<User> coordinators = new HashSet<>();
+        for (ClubMember cm : members) {
+            if (cm.getRole() == ClubMember.Role.COORDINATOR) {
+                coordinators.add(cm.getUser());
+            }
+        }
+        return coordinators;
+    }
+
+   
 }

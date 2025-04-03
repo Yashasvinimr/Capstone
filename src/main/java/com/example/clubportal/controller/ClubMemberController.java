@@ -1,8 +1,13 @@
 package com.example.clubportal.controller;
 
 import com.example.clubportal.entity.ClubMember;
+import com.example.clubportal.entity.User;
 import com.example.clubportal.service.ClubMemberService;
+import com.example.clubportal.service.UserService;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +19,19 @@ import java.util.List;
 public class ClubMemberController {
     private final ClubMemberService clubMemberService;
 
-    // 📌 Get all APPROVED members of a club
+    @Autowired
+    private UserService userService;
+
+    //📌 Get all APPROVED members of a club
     @GetMapping
     public ResponseEntity<List<ClubMember>> getMembersByClub(@PathVariable Long clubId) {
         return ResponseEntity.ok(clubMemberService.getMembersByClub(clubId));
     }
+    
+
+    
+
+
 
     // 📌 Get all PENDING members (for approval/rejection)
     @GetMapping("/pending")

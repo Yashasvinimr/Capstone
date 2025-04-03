@@ -4,8 +4,12 @@ import com.example.clubportal.dto.ClubDTO;
 import com.example.clubportal.entity.Club;
 import com.example.clubportal.entity.User;
 import com.example.clubportal.service.ClubService;
+import com.example.clubportal.service.UserService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +22,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ClubController {
     private final ClubService clubService;
+
+    @Autowired
+    private final UserService userService;
+
+    @GetMapping("/{clubId}/search-users")
+    public ResponseEntity<List<User>> searchUsersInClub(
+        @PathVariable Long clubId,
+        @RequestParam String query
+    ) {
+        List<User> users = userService.findUsersByClubAndName(clubId, query);
+        return ResponseEntity.ok(users);
+    }
 
     @GetMapping
     public ResponseEntity<List<ClubDTO>> getAllClubs() {
@@ -41,9 +57,7 @@ public class ClubController {
 
     @PostMapping
     public ResponseEntity<ClubDTO> createClub(@RequestBody Club club) {
-        System.out.println(club.getName() + " :  " + club.getDescription());
         Club newClub = clubService.createClub(club);
-        System.out.println(newClub);
         return ResponseEntity.ok(new ClubDTO(newClub));
     }
 

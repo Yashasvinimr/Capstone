@@ -3,22 +3,46 @@ package com.example.clubportal.service;
 import com.example.clubportal.entity.Club;
 import com.example.clubportal.entity.ClubMember;
 import com.example.clubportal.entity.User;
+import com.example.clubportal.exceptions.ClubNotFoundException;
 import com.example.clubportal.repository.ClubMemberRepository;
 import com.example.clubportal.repository.ClubRepository;
 import com.example.clubportal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ClubMemberService {
     private final ClubMemberRepository clubMemberRepository;
     private final ClubRepository clubRepository;
-    private final UserRepository userRepository;
+    
+
+
+    @Autowired
+    private UserRepository userRepository;
+
+    
+
+    public List<User> searchMembersByName(Long clubId, String query) {
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new ClubNotFoundException("Club not found with id: " + clubId));
+
+        List<ClubMember> clubMembers = clubMemberRepository.findByClub(club);
+
+        return clubMembers.stream()
+                .map(ClubMember::getUser)
+                .filter(user -> user.getName().toLowerCase().contains(query.toLowerCase()))
+                .map(user -> new User())
+                .collect(Collectors.toList());
+    }
+        
 
     // Get all APPROVED members of a club
     public List<ClubMember> getMembersByClub(Long clubId) {
@@ -89,28 +113,37 @@ public class ClubMemberService {
         clubMemberRepository.delete(member);
     }
 
-    // Promote a member to coordinator
+    // // Promote a member to coordinator
+    // @Transactional
+    // public ClubMember promoteToCoordinator(Long clubId, Long userId) {
+    //     Club club = clubRepository.findById(clubId)
+    //             .orElseThrow(() -> new IllegalArgumentException("Club not found"));
+    //     User user = userRepository.findById(userId)
+    //             .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+    //     ClubMember clubMember = clubMemberRepository.findByClubAndUser(club, user)
+    //             .orElseThrow(() -> new IllegalStateException("User is not a member of this club"));
+
+    //     // if (clubMember.getStatus() != ClubMember.Status.APPROVED) {
+    //     //     throw new IllegalStateException("User must be an approved member before promotion");
+    //     // }
+
+    //     // if (clubMember.getRole() == ClubMember.Role.COORDINATOR) {
+    //     //     throw new IllegalStateException("User is already a coordinator");
+    //     // }
+
+    //     clubMember.setRole(ClubMember.Role.COORDINATOR);
+    //     return clubMemberRepository.save(clubMember);
+    // }
     @Transactional
     public ClubMember promoteToCoordinator(Long clubId, Long userId) {
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new IllegalArgumentException("Club not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        ClubMember clubMember = clubMemberRepository.findByClubAndUser(club, user)
+        ClubMember clubMember = clubMemberRepository.findByClubIdAndUserId(clubId, userId)
                 .orElseThrow(() -> new IllegalStateException("User is not a member of this club"));
-
-        if (clubMember.getStatus() != ClubMember.Status.APPROVED) {
-            throw new IllegalStateException("User must be an approved member before promotion");
-        }
-
-        if (clubMember.getRole() == ClubMember.Role.COORDINATOR) {
-            throw new IllegalStateException("User is already a coordinator");
-        }
 
         clubMember.setRole(ClubMember.Role.COORDINATOR);
         return clubMemberRepository.save(clubMember);
     }
+
 
     // Remove a member from a club
     @Transactional

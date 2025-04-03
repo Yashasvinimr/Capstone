@@ -1,6 +1,8 @@
 package com.example.clubportal.dto;
 
 import com.example.clubportal.entity.Club;
+import com.example.clubportal.entity.User;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,9 +17,10 @@ public class ClubDTO {
         this.name = club.getName();
         this.description = club.getDescription();
         this.coordinators = club.getCoordinators().stream()
-                .map(cm -> cm.getUser().getName()) // Extract only unique names
-                .collect(Collectors.toSet()); // Convert to Set to avoid duplicates
+                .map(User::getName) // Extract user names
+                .collect(Collectors.toSet()); // Convert to Set to remove duplicates
     }
+    
 
     // Getters
     public Long getId() { return id; }

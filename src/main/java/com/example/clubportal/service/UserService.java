@@ -5,6 +5,9 @@ import com.example.clubportal.exceptions.InvalidEmailException;
 import com.example.clubportal.exceptions.ResourceNotFoundException;
 import com.example.clubportal.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,6 +23,7 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User with email " + email + " not found"));
     }
+    
 
     public User getUserById(Long id) {
         return userRepository.findById(id)
@@ -32,5 +36,9 @@ public class UserService {
             throw new InvalidEmailException("Invalid email format. Only @bmsce.ac.in allowed.");
         }
         return userRepository.save(user);
+    }
+
+    public List<User> findUsersByClubAndName(Long clubId, String name) {
+        return userRepository.findUsersByClubIdAndName(clubId, name);
     }
 }

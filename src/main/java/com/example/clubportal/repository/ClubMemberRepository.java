@@ -15,4 +15,7 @@ public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
     List<ClubMember> findByClubAndStatus(Club club, ClubMember.Status status); // Find members by club & status
     List<ClubMember> findByClub(Club club);
     List<ClubMember> findByUserId(Long userId);
+    void deleteAllByClubAndRole(Club club, ClubMember.Role role);
+    Optional<ClubMember>findByClubIdAndUserId(Long clubId, Long userId);
+    
 }

@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,21 +46,22 @@ public class ClubService {
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new ClubNotFoundException("Club not found"));
 
-        Iterator<Long> itr = userIds.iterator();
-        while (itr.hasNext()) {
-            System.out.println(itr.next() + " : ");
-        }
-        System.out.println("User Ids are" + userIds);
         Set<User> users = userRepository.findAllById(userIds).stream().collect(Collectors.toSet());
 
         if (users.isEmpty()) {
             throw new UserNotFoundException("No valid users found for provided IDs");
         }
 
+        // Remove existing coordinators first
+        clubMemberRepository.deleteAllByClubAndRole(club, ClubMember.Role.COORDINATOR);
+
         // Convert Users to ClubMembers
         Set<ClubMember> coordinators = users.stream()
                 .map(user -> new ClubMember(user, club, ClubMember.Role.COORDINATOR))
                 .collect(Collectors.toSet());
+
+        // Save new coordinators
+        clubMemberRepository.saveAll(coordinators);
 
         club.setCoordinators(coordinators);
         clubRepository.save(club);
@@ -102,9 +102,14 @@ public class ClubService {
         clubMemberRepository.delete(clubMember);
     }
 
+    
     public Set<User> getClubMembers(Long clubId) {
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new ClubNotFoundException("Club not found"));
-        return club.getMembers();
+    
+        return club.getMembers().stream()
+                .map(ClubMember::getUser) // Extract User from ClubMember
+                .collect(Collectors.toSet());
     }
+    
 }
