@@ -6,11 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Set;
-
 
 @Entity
 @Table(name = "clubs")
@@ -18,6 +18,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class Club {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,10 +37,6 @@ public class Club {
     private Set<ClubMember> coordinators;
 
     @ManyToMany
-    @JoinTable(
-            name = "club_members",
-            joinColumns = @JoinColumn(name = "club_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
+    @JoinTable(name = "club_members", joinColumns = @JoinColumn(name = "club_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
     private Set<User> members;
 }

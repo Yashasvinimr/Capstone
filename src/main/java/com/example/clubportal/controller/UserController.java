@@ -2,7 +2,7 @@ package com.example.clubportal.controller;
 
 import org.apache.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+// import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -46,17 +46,15 @@ public class UserController {
             return ResponseEntity.badRequest().body("Invalid phone number format");
         }
 
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        // BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        // user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // Assign the default role of MEMBER
-        if (user.getRole() ==null){
+        if (user.getRole() == null) {
             user.setRole(Role.MEMBER);
-        }
-        else{
+        } else {
             user.setRole(user.getRole());
         }
-        
 
         User savedUser = userService.saveUser(user);
         return ResponseEntity.status(HttpStatus.SC_CREATED).body(savedUser);
@@ -69,12 +67,32 @@ public class UserController {
                 .orElseThrow(() -> new UserNotFoundException("User not found with email: " + loginRequest.getEmail()));
 
         // Verify password
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED).body("Invalid email or password");
+        // BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        // if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
+        // {
+
+        // return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED).body("Invalid email
+        // or password");
+        // ss}
+        // Role enumRoleValue = user.getRole();
+        // Return the user's role (you can return any other user details as needed)
+        // return ResponseEntity.ok(user.getRole()); // Return only role or any other
+        // details you need
+        // return ResponseEntity.ok(enumRoleValue); // Return only role or any other
+        // details you need
+        // return ResponseEntity.ok(new RoleResponse(user.getRole()));
+        return ResponseEntity.ok(user);
+    }
+
+    static class RoleResponse {
+        private Role role;
+
+        public RoleResponse(Role role) {
+            this.role = role;
         }
 
-        // Return the user's role (you can return any other user details as needed)
-        return ResponseEntity.ok(user.getRole()); // Return only role or any other details you need
+        public Role getRole() {
+            return role;
+        }
     }
 }

@@ -45,11 +45,11 @@
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>  <!-- Use the latest version -->
 		</dependency>
-
+<!-- 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
+		</dependency> -->
 
 		<!-- Lombok (Ensure Version Is Specified) -->
 		<dependency>

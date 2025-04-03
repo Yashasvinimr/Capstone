@@ -61,4 +61,5 @@ public class ClubMember {
         PENDING, // Waiting for approval
         APPROVED, REJECTED // Successfully joined
     }
+    
 }

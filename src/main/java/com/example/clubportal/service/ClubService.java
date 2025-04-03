@@ -1,5 +1,6 @@
 package com.example.clubportal.service;
 
+import com.example.clubportal.dto.ClubDTO;
 import com.example.clubportal.entity.Club;
 import com.example.clubportal.entity.ClubMember;
 import com.example.clubportal.entity.User;
@@ -8,11 +9,11 @@ import com.example.clubportal.exceptions.UserNotFoundException;
 import com.example.clubportal.repository.ClubMemberRepository;
 import com.example.clubportal.repository.ClubRepository;
 import com.example.clubportal.repository.UserRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.util.List;
+
+import java.util.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,20 +43,30 @@ public class ClubService {
     }
 
     @Transactional
-    public Club addCoordinators(Long clubId, Set<Long> userIds) {
+    public ClubDTO assignCoordinators(Long clubId, Set<Long> userIds) {
         Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new RuntimeException("Club not found"));
+                .orElseThrow(() -> new ClubNotFoundException("Club not found"));
 
-        Set<ClubMember> coordinators = userIds.stream()
-                .map(userId -> {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new UserNotFoundException("User not found"));
-                    return new ClubMember(user, club, ClubMember.Role.COORDINATOR);
-                })
+        Iterator<Long> itr = userIds.iterator();
+        while (itr.hasNext()) {
+            System.out.println(itr.next() + " : ");
+        }
+        System.out.println("User Ids are" + userIds);
+        Set<User> users = userRepository.findAllById(userIds).stream().collect(Collectors.toSet());
+
+        if (users.isEmpty()) {
+            throw new UserNotFoundException("No valid users found for provided IDs");
+        }
+
+        // Convert Users to ClubMembers
+        Set<ClubMember> coordinators = users.stream()
+                .map(user -> new ClubMember(user, club, ClubMember.Role.COORDINATOR))
                 .collect(Collectors.toSet());
 
-        clubMemberRepository.saveAll(coordinators);
-        return club;
+        club.setCoordinators(coordinators);
+        clubRepository.save(club);
+
+        return new ClubDTO(club);
     }
 
     public Club updateClub(Long id, Club updatedClub) {
@@ -70,31 +81,30 @@ public class ClubService {
 
         return clubRepository.save(existingClub);
     }
+
     public void deleteClub(Long id) {
         if (!clubRepository.existsById(id)) {
-            throw new EntityNotFoundException("Club with ID " + id + " not found.");
+            throw new ClubNotFoundException("Club with ID " + id + " not found.");
         }
         clubRepository.deleteById(id);
     }
+
     public void removeMemberFromClub(Long clubId, Long userId) {
         Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new EntityNotFoundException("Club not found with ID: " + clubId));
+                .orElseThrow(() -> new ClubNotFoundException("Club not found with ID: " + clubId));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found with ID: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with ID: " + userId));
 
         ClubMember clubMember = clubMemberRepository.findByClubAndUser(club, user)
-                .orElseThrow(() -> new EntityNotFoundException("User is not a member of this club"));
+                .orElseThrow(() -> new ClubNotFoundException("User is not a member of this club"));
 
         clubMemberRepository.delete(clubMember);
     }
 
     public Set<User> getClubMembers(Long clubId) {
         Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new RuntimeException("Club not found"));
-        return club.getMembers(); // Assuming `Club` entity has a `Set<User> members`
+                .orElseThrow(() -> new ClubNotFoundException("Club not found"));
+        return club.getMembers();
     }
-
-
-
 }

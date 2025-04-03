@@ -2,8 +2,10 @@ package com.example.clubportal.controller;
 
 import com.example.clubportal.dto.ClubDTO;
 import com.example.clubportal.entity.Club;
+import com.example.clubportal.entity.User;
 import com.example.clubportal.service.ClubService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/clubs")
+@RequestMapping("/api/clubs")
 @RequiredArgsConstructor
 public class ClubController {
     private final ClubService clubService;
@@ -20,7 +22,7 @@ public class ClubController {
     @GetMapping
     public ResponseEntity<List<ClubDTO>> getAllClubs() {
         List<ClubDTO> clubs = clubService.getAllClubs().stream()
-                .map(ClubDTO::new) // Convert to DTO
+                .map(ClubDTO::new)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(clubs);
     }
@@ -39,14 +41,19 @@ public class ClubController {
 
     @PostMapping
     public ResponseEntity<ClubDTO> createClub(@RequestBody Club club) {
+        System.out.println(club.getName() + " :  " + club.getDescription());
         Club newClub = clubService.createClub(club);
+        System.out.println(newClub);
         return ResponseEntity.ok(new ClubDTO(newClub));
     }
 
-    @PostMapping("/{clubId}/coordinators")
-    public ResponseEntity<ClubDTO> addCoordinators(@PathVariable Long clubId, @RequestBody Set<Long> userIds) {
-        Club updatedClub = clubService.addCoordinators(clubId, userIds);
-        return ResponseEntity.ok(new ClubDTO(updatedClub));
+    @PutMapping("/{clubId}/coordinators")
+    public ResponseEntity<ClubDTO> assignCoordinators(
+            @PathVariable Long clubId,
+            @RequestBody Set<Long> userIds) {
+        
+        ClubDTO updatedClub = clubService.assignCoordinators(clubId, userIds);
+        return ResponseEntity.ok(updatedClub);
     }
 
     @PutMapping("/{id}")
@@ -54,15 +61,15 @@ public class ClubController {
         Club club = clubService.updateClub(id, updatedClub);
         return ResponseEntity.ok(new ClubDTO(club));
     }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteClub(@PathVariable Long id) {
         clubService.deleteClub(id);
         return ResponseEntity.ok("Club deleted successfully!");
     }
-//    @GetMapping("/{clubId}/members")
-//    public ResponseEntity<Set<User>> getClubMembers(@PathVariable Long clubId) {
-//        return ResponseEntity.ok(clubService.getClubMembers(clubId));
-//    }
 
-
+    @GetMapping("/{clubId}/members")
+    public ResponseEntity<Set<User>> getClubMembers(@PathVariable Long clubId) {
+        return ResponseEntity.ok(clubService.getClubMembers(clubId));
+    }
 }
