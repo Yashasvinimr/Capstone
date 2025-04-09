@@ -1,17 +1,14 @@
 package com.example.clubportal.controller;
 
 import java.util.List;
+import java.util.Optional;
 
+import com.example.clubportal.dto.UserProfileDTO;
 import org.apache.http.HttpStatus;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.ResponseEntity;
 // import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.clubportal.dto.LoginRequest;
 import com.example.clubportal.entity.ClubMember.Role;
@@ -86,6 +83,21 @@ public class UserController {
         // details you need
         // return ResponseEntity.ok(new RoleResponse(user.getRole()));
         return ResponseEntity.ok(user);
+    }
+    @GetMapping("/profile/{userId}")
+    public ResponseEntity<User> getUserProfile(@PathVariable Long userId) {
+        Optional<User> user = userRepository.findById(userId);
+        return user.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
+
+    @PutMapping("/profile")
+    public ResponseEntity<String> updateProfile(@RequestParam String email,
+                                                @RequestBody UserProfileDTO dto) {
+        userService.updateProfile(email, dto);
+        return ResponseEntity.ok("Profile updated successfully");
     }
 
     static class RoleResponse {

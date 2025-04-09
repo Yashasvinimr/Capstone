@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/clubs")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
 public class ClubController {
     private final ClubService clubService;
 
@@ -86,4 +87,10 @@ public class ClubController {
     public ResponseEntity<Set<User>> getClubMembers(@PathVariable Long clubId) {
         return ResponseEntity.ok(clubService.getClubMembers(clubId));
     }
+    @PutMapping("/{clubId}/members/{userId}/promote")
+    public ResponseEntity<String> promoteMemberToCoordinator(@PathVariable Long clubId, @PathVariable Long userId) {
+        clubService.promoteMemberToCoordinator(clubId, userId);
+        return ResponseEntity.ok("User promoted to coordinator successfully");
+    }
+
 }

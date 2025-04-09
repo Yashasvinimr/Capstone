@@ -15,4 +15,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u JOIN ClubMember cm ON u.id = cm.user.id WHERE cm.club.id = :clubId AND LOWER(u.name) LIKE LOWER(CONCAT('%', :name, '%'))")
     List<User> findUsersByClubIdAndName(@Param("clubId") Long clubId, @Param("name") String name);
+
+    @Query("SELECT u FROM User u JOIN ClubMember cm ON u.id = cm.user.id " +
+            "WHERE cm.club.id = :clubId AND " +
+            "(LOWER(u.name) LIKE LOWER(CONCAT('%', :query, '%')) " +
+            "OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')))")
+    List<User> findUsersByClubAndName(@Param("clubId") Long clubId, @Param("query") String query);
+
 }

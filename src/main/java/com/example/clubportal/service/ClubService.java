@@ -22,7 +22,7 @@ public class ClubService {
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
     private final ClubMemberRepository clubMemberRepository;
-
+    private final UserService userService;
     public List<Club> getAllClubs() {
         return clubRepository.findAll();
     }
@@ -111,5 +111,17 @@ public class ClubService {
                 .map(ClubMember::getUser) // Extract User from ClubMember
                 .collect(Collectors.toSet());
     }
-    
+    public void promoteMemberToCoordinator(Long clubId, Long userId) {
+        Club club = getClubById(clubId);
+        User user = userService.getUserById(userId);
+
+        if (!club.getMembers().contains(user)) {
+            throw new RuntimeException("User is not a member of this club");
+        }
+
+        // Ensure role is changed
+        user.setRole(ClubMember.Role.COORDINATOR);
+        userService.saveUser(user);
+    }
+
 }
